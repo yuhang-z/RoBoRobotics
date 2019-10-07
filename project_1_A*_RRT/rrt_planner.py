@@ -132,8 +132,8 @@ class RRTPlanner(object):
             y = s_rand.y
         else: 
             angle = atan2(s_rand.y - s_nearest.y, s_rand.x - s_nearest.x)
-            x = s_nearest.x + sin(angle) * max_radius
-            y = s_nearest.y + cos(angle) * max_radius
+            x = s_nearest.x + cos(angle) * max_radius
+            y = s_nearest.y + sin(angle) * max_radius
        
         if x > np.size(self.occ_grid, 0) -1 or y > np.size(self.occ_grid, 1) -1 :
             s_new = s_nearest
@@ -148,23 +148,30 @@ class RRTPlanner(object):
         Returns true iff the line path from s_from to s_to
         is free
         """
+        x = int(s_from.x)
+        y = int(s_from.y)
+        s_from = State(x, y, None)
         assert (self.state_is_free(s_from))
         
         checker = 0 
-
+        x = int(s_to.x)
+        y = int(s_to.y)
+        s_to = State(x, y, None)
         if not (self.state_is_free(s_to)):
             return False
 
-        max_checks = 10
+        max_checks = 100
 
         for i in xrange(max_checks):
-            # TODO: check if the inteprolated state that is float(i)/max_checks * dist(s_from, s_new)
+            # TODO: check if the inteprolated state that is float(i)/ * dist(s_from, s_new)
             # away on the line from s_from to s_new is free or not. If not free return False-------------------------------3---
+            if i > 0:
+                diffx = int(float(s_to.x - s_from.x) / float(i) * max_checks)
+                diffy = int(float(s_to.y - s_from.y) / float(i) * max_checks)
+            else:
+                diffx = 0
+                diffy = 0    
             
-            diffx = (s_to.x - s_from.x) * (max_checks / float(i))
-            #sqrt(float(i)/max_checks * sqrt((s_from.x - s_to.x)**2 - (s_from.y - s_to.y)**2))
-            diffy = (s_to.y - s_from.y) * (max_checks / float(i))
-            #sqrt(float(i)/max_checks * sqrt((s_from.x - s_to.x)**2 - (s_from.y - s_to.y)**2))
             
             s_test = State(s_from.x + diffx, s_from.y + diffy, None)
             
@@ -216,8 +223,8 @@ class RRTPlanner(object):
                     break
                 
                 # plot the new node and edge
-                cv2.circle(img, (s_new.x, s_new.y), 2, (0,0,0))
-                cv2.line(img, (s_nearest.x, s_nearest.y), (s_new.x, s_new.y), (255,0,0))
+                cv2.circle(img, (int(s_new.x), int(s_new.y)), 2, (0,0,0))
+                cv2.line(img, (int(s_nearest.x), int(s_nearest.y)), (int(s_new.x), int(s_new.y)), (255,0,0))
 
             # Keep showing the image for a bit even
             # if we don't add a new node and edge
@@ -243,9 +250,9 @@ if __name__ == "__main__":
     rrt = RRTPlanner(world)
 
     start_state = State(10, 10, None)
-    dest_state = State(500, 500, None)
+    dest_state = State(250, 350, None)
 
-    max_num_steps = 1000     # max number of nodes to be added to the tree 
+    max_num_steps = 10000     # max number of nodes to be added to the tree 
     max_steering_radius = 30 # pixels
     dest_reached_radius = 50 # pixels
     plan = rrt.plan(start_state,
