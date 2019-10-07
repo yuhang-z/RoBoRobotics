@@ -163,7 +163,7 @@ class AStarPlanner(object):
                     continue
 
                 transition_distance = sqrt((ns.x - s.x)**2 + (ns.y - s.y)**2)
-                #HERE IS THE DISTANCE TO THE FINAL DISATCNE 
+                #HERE IS THE DISTANCE TO THE FINAL DISATCNE --------------------------------1-----------
                 target_diatance = sqrt(( dest_state.x - ns.x)**2 + ( dest_state.y - ns.y)**2)
                 alternative_best_dist_ns = best_dist_found[s.x, s.y] + transition_distance + target_diatance
 
@@ -195,8 +195,7 @@ if __name__ == "__main__":
 
     # TODO: Change the goal state to 3 different values, saving and running between each
     # in order to produce your images to submit
-    dest_state = State(500, 500)
+    dest_state = State(50, 500)
     
     plan = astar.plan(start_state, dest_state)
     draw_plan(world, plan)
-    

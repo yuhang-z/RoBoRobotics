@@ -7,7 +7,7 @@ import random
 import cv2
 
 from itertools import product
-from math import cos, sin, pi, sqrt 
+from math import cos, sin, pi, sqrt, atan2
 
 from plotting_utils import draw_plan
 from priority_queue import priority_dict
@@ -72,8 +72,8 @@ class RRTPlanner(object):
         """
         #TODO: make sure you're not exceeding the row and columns bounds
         # x must be in {0, cols-1} and y must be in {0, rows -1}-------------------------------------------------------1------
-        x = random.randint(0, self.world.a - 1)
-        y = random.randint(0, self.world.b - 1)  
+        x = random.randint(0, np.size(self.occ_grid, 0) -1)
+        y = random.randint(0, np.size(self.occ_grid, 1) -1) 
         return State(x, y, None)
            
 
@@ -127,15 +127,15 @@ class RRTPlanner(object):
         # graient is to determine the position of the new s_nearest 
         angle = 0
         #If s_rand is within a circle of max_radius from s_nearest, then s_new.x = s_rand.x and s_new.y = s_rand.y
-        if sqrt((s_rand.x - s_nearest.x)**2 + (s_rand.y - s_nearesr.y)**2):
+        if sqrt((s_rand.x - s_nearest.x)**2 + (s_rand.y - s_nearest.y)**2) < max_radius:
             x = s_rand.x
             y = s_rand.y
         else: 
-            angle = math.atan2(s_rand.y - s_nearesr.y, s_rand.x - s_nearest.x)
-            x = s_nearest.x + math.sin(angle) * max_radius
-            y = s_nearest.y + math.cos(angle) * max_radius
+            angle = atan2(s_rand.y - s_nearest.y, s_rand.x - s_nearest.x)
+            x = s_nearest.x + sin(angle) * max_radius
+            y = s_nearest.y + cos(angle) * max_radius
        
-        if x > self.world.a - 1 or y > self.world.b - 1 :
+        if x > np.size(self.occ_grid, 0) -1 or y > np.size(self.occ_grid, 1) -1 :
             s_new = s_nearest
         else:
             s_new = State(x, y, s_nearest)
@@ -150,24 +150,32 @@ class RRTPlanner(object):
         """
         assert (self.state_is_free(s_from))
         
+        checker = 0 
+
         if not (self.state_is_free(s_to)):
             return False
 
         max_checks = 10
+
         for i in xrange(max_checks):
             # TODO: check if the inteprolated state that is float(i)/max_checks * dist(s_from, s_new)
             # away on the line from s_from to s_new is free or not. If not free return False-------------------------------3---
             
-            diffx = math.cos(float(i)/max_checks * dist(s_from, s_new))
-            diffy = math.sin(float(i)/max_checks * dist(s_from, s_new))
+            diffx = (s_to.x - s_from.x) * (max_checks / float(i))
+            #sqrt(float(i)/max_checks * sqrt((s_from.x - s_to.x)**2 - (s_from.y - s_to.y)**2))
+            diffy = (s_to.y - s_from.y) * (max_checks / float(i))
+            #sqrt(float(i)/max_checks * sqrt((s_from.x - s_to.x)**2 - (s_from.y - s_to.y)**2))
             
             s_test = State(s_from.x + diffx, s_from.y + diffy, None)
             
-            if not (self.state_is_free(s_test)):
-                return False
+            # if not (self.state_is_free(s_test) == False): return False
+            if not (self.state_is_free(s_test)): 
+               checker =  1 
             
-        # Otherwise the line is free, so return true
-        return True
+        if checker == 1: 
+            return False
+        else:
+            return True      # Otherwise the line is free, so return true
 
     
     def plan(self, start_state, dest_state, max_num_steps, max_steering_radius, dest_reached_radius):
@@ -193,8 +201,8 @@ class RRTPlanner(object):
             # TODO: Use the methods of this class as in the slides to
             # compute s_new-----------------------------------------------------------------------------------------4------
             s_random = self.sample_state()
-            s_nearest = self.find_closest_state(plan, s_random)
-            s_new = self.steer_towards(s_nearest, s_random, max_radius)
+            s_nearest = self.find_closest_state(tree_nodes, s_random)
+            s_new = self.steer_towards(s_nearest, s_random, max_steering_radius)
             
             if self.path_is_obstacle_free(s_nearest, s_new):
                 tree_nodes.add(s_new)
@@ -245,4 +253,3 @@ if __name__ == "__main__":
                     max_num_steps,
                     max_steering_radius,
                     dest_reached_radius)
-    
