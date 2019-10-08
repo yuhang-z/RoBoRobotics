@@ -163,16 +163,18 @@ class AStarPlanner(object):
                     continue
 
                 transition_distance = sqrt((ns.x - s.x)**2 + (ns.y - s.y)**2)
-                #HERE IS THE DISTANCE TO THE FINAL DISATCNE --------------------------------1-----------
-                target_diatance = sqrt(( dest_state.x - ns.x)**2 + ( dest_state.y - ns.y)**2)
-                alternative_best_dist_ns = best_dist_found[s.x, s.y] + transition_distance + target_diatance
+                target_diatance = sqrt((dest_state.x - ns.x)**2 + (dest_state.y - ns.y)**2)
+
+                best_dist_found_ns = best_dist_found[s.x, s.y] + transition_distance
+                alternative_best_dist_ns = best_dist_found_ns + target_diatance
+
 
                 # if the state ns has not been visited before or we just found a shorter path
                 # to visit it then update its priority in the queue, and also its
                 # distance to come and its parent
-                if (ns not in Q) or (alternative_best_dist_ns < best_dist_found[ns.x, ns.y]):
+                if (ns not in Q) or (best_dist_found_ns < best_dist_found[ns.x, ns.y]):
                     Q[ns] = alternative_best_dist_ns
-                    best_dist_found[ns.x, ns.y] = alternative_best_dist_ns
+                    best_dist_found[ns.x, ns.y] = best_dist_found_ns
                     parents[ns] = s
                     
         return [start_state]
@@ -195,7 +197,7 @@ if __name__ == "__main__":
 
     # TODO: Change the goal state to 3 different values, saving and running between each
     # in order to produce your images to submit
-    dest_state = State(50, 500)
+    dest_state = State(423, 529)
     
     plan = astar.plan(start_state, dest_state)
     draw_plan(world, plan)

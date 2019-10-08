@@ -166,8 +166,8 @@ class RRTPlanner(object):
             # TODO: check if the inteprolated state that is float(i)/ * dist(s_from, s_new)
             # away on the line from s_from to s_new is free or not. If not free return False-------------------------------3---
             if i > 0:
-                diffx = int(float(s_to.x - s_from.x) / float(i) * max_checks)
-                diffy = int(float(s_to.y - s_from.y) / float(i) * max_checks)
+                diffx = int(float(s_to.x - s_from.x) * (float(i) / max_checks))
+                diffy = int(float(s_to.y - s_from.y) * (float(i) / max_checks))
             else:
                 diffx = 0
                 diffy = 0    
@@ -250,7 +250,7 @@ if __name__ == "__main__":
     rrt = RRTPlanner(world)
 
     start_state = State(10, 10, None)
-    dest_state = State(250, 350, None)
+    dest_state = State(550, 250, None)
 
     max_num_steps = 10000     # max number of nodes to be added to the tree 
     max_steering_radius = 30 # pixels
