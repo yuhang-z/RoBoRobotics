@@ -1,4 +1,3 @@
-# Robotics417
-
+# RoboRobotics
 <br/>
-This repo includes 4 algorithm projects that illustrate my understanding on robotics path&planning algorithms, probabilistic reasoning, optimization, inference mechanisms, and behavior strategies.
+*This repo includes a wild range of **Robotics** and **Control** algorithms and projects examples.* //
